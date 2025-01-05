@@ -1,6 +1,7 @@
 import { useState } from 'react'
 const Button = (props) =>{
     return(
+        // eslint-disable-next-line react/prop-types
       <button onClick={props.handleClick}>{props.text}</button>
     )
 }
