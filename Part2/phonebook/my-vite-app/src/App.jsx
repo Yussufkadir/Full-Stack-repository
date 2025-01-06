@@ -1,12 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import PersonList from './PersonList'
+import axios from 'axios'
+
 const App = () => {
   const [persons, setPersons] = useState([{name: "Arto Hellas", number: '12-00'}]) 
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
   const [searchedT, setSearchT] = useState('')
+
+  useEffect(() => {
+    axios 
+        .get('http://localhost:3001/persons')
+        .then(response =>{
+          setPersons(response.data)
+        })
+  }, [])
 
   const namesToShow = searchedT
   ? persons.filter(person => person.name.includes(searchedT))
