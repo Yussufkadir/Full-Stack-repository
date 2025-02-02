@@ -2,50 +2,52 @@ import { useState, useEffect } from 'react'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import PersonList from './PersonList'
-import axios from 'axios'
+import personService from './services/persons'  
 
 const App = () => {
-  const [persons, setPersons] = useState([{name: "Arto Hellas", number: '12-00'}]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
   const [searchedT, setSearchT] = useState('')
 
   useEffect(() => {
-    axios 
-        .get('http://localhost:3001/persons')
-        .then(response =>{
-          setPersons(response.data)
-        })
+    PersonService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
+      })
   }, [])
 
   const namesToShow = searchedT
-  ? persons.filter(person => person.name.includes(searchedT))
-  : persons
+    ? persons.filter(person => person.name.toLowerCase().includes(searchedT.toLowerCase()))
+    : persons
 
-  const addName = (event) =>{
+  const addName = (event) => {
     event.preventDefault()
     const nameObject = {
       name: newName,
       number: newNum
     }
-    if(persons.some(person => person.name == newName)){
+    
+    if(persons.some(person => person.name === newName)){
       alert(`${newName} is already added to list`)
       return
     }
-    setPersons(persons.concat(nameObject))
-    setNewName('')
-    setNewNum('')
-    console.log('button clicked', event.target)
-    console.log(persons)
+  
+    PersonService
+      .create(nameObject)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
+        setNewName('')
+        setNewNum('')
+      })
   }
 
   const handleNameChange = (event) => {
-    console.log(event.target.value)
     setNewName(event.target.value)
   }
 
   const handleNumChange = (event) => {
-    console.log(event.target.value)
     setNewNum(event.target.value)
   }
 
@@ -56,11 +58,17 @@ const App = () => {
   return (
     <div>
       <h2>Filter</h2>
-      <form>
-        <Filter searchedT={searchedT} handleSearchChange={handleSearchChange}/>
-      </form>
+      <Filter searchedT={searchedT} handleSearchChange={handleSearchChange}/>
+      
       <h2>Phonebook</h2>
-      <PersonForm name={newName} nameHandler={setNewName} num={newNum} numHandler={setNewNum} addName={addName}/>
+      <PersonForm 
+        name={newName} 
+        nameHandler={handleNameChange}
+        num={newNum} 
+        numHandler={handleNumChange} 
+        addName={addName}
+      />
+      
       <h2>Numbers</h2>
       <PersonList persons={namesToShow}/>
     </div>
